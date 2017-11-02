@@ -4,6 +4,7 @@ g++ Client.cpp run_ImgClient.cpp -o ImgClient
 
 How to run Server:
  ImgServer <server_ip> <port> <path to save transferred images>
+ To stop server: hit Ctrl+c
 
 How to run Client:
  ImgClient <server_ip> <port> <image path>

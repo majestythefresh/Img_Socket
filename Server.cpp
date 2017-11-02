@@ -19,6 +19,13 @@ Server::Server(const char *ip_server, unsigned short port_server,
   server_path = path_server;
 }
 
+Server::~Server(){
+//Destructor
+//
+  close(accept_fd);
+  cout << "Goodbye!..." << endl;
+}
+
 /***********************************************************************/
 const char * Server::getIP(){
 //Get server ip to listen
@@ -61,11 +68,11 @@ Errors Server::goListen(){
   bool is_from_local = false;
   //Start listen connection attempts
   listen(socket_fd, 0);
-  std::cout << "Listening in [" << server_ip << "] - Port [" << server_port <<
-               "]" << endl;
+  cout << "Listening in [" << server_ip << "] - Port [" << server_port <<
+           "]" << endl;
   socklen_t client_len = sizeof (client);
   //Keep listening tranfers
-  while (1){
+  while (!end_flag){
     //accept any try to request to Server
     accept_fd = accept(socket_fd, (struct sockaddr *) &client, &client_len);
     if (accept_fd < 0){
@@ -143,6 +150,7 @@ bool Server::rcvImage(){
         fflush(cp_file);
       }
     }
+    fclose(cp_file);
   }
   else{
     cout << "--- Wrong File request type: No Image [ X ] ---" << endl;

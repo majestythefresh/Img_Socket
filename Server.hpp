@@ -26,22 +26,26 @@ class Server
 public:
   Server(const char *ip_server, unsigned short port_server,
         const char *path_server);
+  ~Server();
   const char * getIP();
   const int getPort();
   Errors openCon();
   Errors goListen();
-  friend Errors printResponse( Errors er, Server srv );
+  friend Errors printResponse( Errors er, Server *srv );
+  friend void quitHandler(int param);
 
 private:
   const char *server_ip;
   unsigned short server_port;
   const char *server_path;
-  int socket_fd, accept_fd;
+  static int socket_fd; //Static to close socket trough a signal handler
+  int accept_fd;
   struct sockaddr_in server;
   struct sockaddr_in client;
   uint32_t cl_network_addr;
   uint32_t cl_host_addr;
   bool flag_local_request;
+  static bool end_flag; //Static to close socket listen loop
 
   bool rcvImage();
   void setIP(const char *ip_string);

@@ -8,31 +8,44 @@
 *
 ***********************************************************************/
 #include "Server.hpp"
+#include <signal.h>
+
+bool Server::end_flag = false;
+int Server::socket_fd = 0;
+
+void quitHandler(int param)
+{
+  printf("--- User pressed Ctrl+C ---\n");
+  //Set flag to exit from listen loop
+  Server::end_flag = true;
+  //Closing socket to unblock accept call and then return 0 to call destructor
+  close(Server::socket_fd);
+}
 
 /***********************************************************************/
-Errors printResponse( Errors er, Server srv ){
+Errors printResponse( Errors er, Server *srv ){
 //Helper friend function to handle error messages
 //
   switch(er){
     case NO_ERROR:
-    cout << "Connection Success binding to " << srv.getIP() << endl;
+    cout << "Connection Success binding to " << srv->getIP() << endl;
     break;
 
     case SOCK_ERROR:
-    cout << "Socket creation error to " << srv.getIP() << endl;
+    cout << "Socket creation error to " << srv->getIP() << endl;
     break;
 
     case CON_ERROR:
-    cout << "Connection binding error to " << srv.getIP() << endl;
+    cout << "Connection binding error to " << srv->getIP() << endl;
     break;
 
     case ACCEPT_ERROR:
-    std::cout << "Accept Connection error to " << srv.getIP() << endl;
+    std::cout << "Accept Connection error to " << srv->getIP() << endl;
     break;
 
     default:
-    cout << "Unknow error to [" << srv.getIP()  << "] - Port [" <<
-            srv.getPort() << "]" << endl;
+    cout << "Unknow error to [" << srv->getIP()  << "] - Port [" <<
+            srv->getPort() << "]" << endl;
     break;
   }
   return er;
@@ -42,6 +55,9 @@ Errors printResponse( Errors er, Server srv ){
 int main(int argc, char *argv[]){
 //Main function
 //
+  //Ctrl+c handler to exit properly and call destructor
+  signal(SIGINT, quitHandler);
+
   char * server_ip;
   int server_port;
   char * server_path;
@@ -61,7 +77,7 @@ int main(int argc, char *argv[]){
   Server srv(server_ip, server_port, server_path);
   cout << "Ip Set: " << srv.getIP() << endl;
   //Open a connection as Server
-  if(printResponse(srv.openCon(), srv) == NO_ERROR){
+  if(printResponse(srv.openCon(), &srv) == NO_ERROR){
     //If no error Go to Listen!
     srv.goListen();
   }
