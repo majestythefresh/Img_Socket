@@ -103,6 +103,7 @@ Errors Server::goListen(){
         rcvImage();
       }
     }
+    close(accept_fd);
   }
   return NO_ERROR;
 }
