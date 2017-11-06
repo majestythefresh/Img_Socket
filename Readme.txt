@@ -12,3 +12,13 @@ How to run Client:
 Run Example:
 ./ImgServer 192.168.15.228 3491 /home/server_user
 ./ImgClient 192.168.15.228 3491 /home/client_user/Pictures/test.jpeg
+
+
+
+Run Docker container:
+
+docker build --no-cache -f docker-container/ImgApp.txt -t dev_linux:latest .
+docker run --name server_dev -itd dev_linux:latest
+docker run --name client_dev -itd dev_linux:latest
+docker attach server_dev
+docker attach client_dev
