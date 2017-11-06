@@ -27,14 +27,14 @@ Server::~Server(){
 }
 
 /***********************************************************************/
-const char * Server::getIP(){
+const char * Server::getIP() const{
 //Get server ip to listen
 //
   return server_ip;
 }
 
 /***********************************************************************/
-const int Server::getPort(){
+const int Server::getPort() const{
 //Get server port to listen
 //
   return server_port;
@@ -66,6 +66,7 @@ Errors Server::goListen(){
 // Put Server to listen and accept or denied Image transfers
 //
   bool is_from_local = false;
+  char msgStr[FILE_COMMENT_LEN];
   //Start listen connection attempts
   listen(socket_fd, 0);
   cout << "Listening in [" << server_ip << "] - Port [" << server_port <<
@@ -95,12 +96,14 @@ Errors Server::goListen(){
         cout << "--- NO ACK Message to client sent ---" << endl;
         is_from_local = false;
       }
-      cout << "--- source_ip:<"<< inet_ntoa(client.sin_addr) <<
-              ">,  is_from_local_network:<"<< (is_from_local?"true":"false") <<
-              ">" << endl;
-      if(is_from_local){
-        //Start receiving Image transfer if came from local
-        rcvImage();
+      //Start receiving Image transfer
+      if(rcvImage()){
+        //Inject Exif UserComment
+        sprintf(msgStr, FILE_COMMENT,
+               inet_ntoa(client.sin_addr),
+               (is_from_local?"true":"false"));
+        cout << "---" << msgStr << "---" << endl;
+        writeExifUserComment(msgStr);
       }
     }
     close(accept_fd);
@@ -132,6 +135,7 @@ bool Server::rcvImage(){
     buf_args = strtok( NULL, "|" );
     file_name = basename(buf_args);
     cout << " Image filename : "<< file_name << endl;
+    server_filename = file_name;
     //Concatenate path where to save image with image file name.
     sprintf(file_server_path, "%s/%s", server_path, file_name);
     cout << " Saving Image to "<< file_server_path << endl;
@@ -161,6 +165,133 @@ bool Server::rcvImage(){
 }
 
 /***********************************************************************/
+bool Server::writeExifUserComment(const char * str){
+//Function that injects EXIF USER COMMENT data to received image
+//
+  FILE *imgFile, *newImgFile;
+  char *imgFileBuf;
+  long fileLen;
+	unsigned char *exif_data;
+	unsigned int exif_data_len;
+	ExifEntry *entry;
+  ExifData *exif;
+
+  const unsigned int image_data_offset = IMAGE_DATA_OFFSET;
+  const unsigned char exif_header[] = EXIF_HEADER_OFFSET;
+  // length of data in exif_header
+  const unsigned int exif_header_len = sizeof(exif_header);
+
+  //Open image received to get in raw data
+  imgFile = fopen(server_filename, "rb");
+  fseek(imgFile, 0, SEEK_END);
+  fileLen = ftell(imgFile);
+  rewind(imgFile);
+  //Getting memory for raw data buffer
+  imgFileBuf = (char *)malloc((fileLen+1)*sizeof(char));
+  //Set char raw data in buffer
+  fread(imgFileBuf, fileLen, 1, imgFile);
+  fclose(imgFile);
+
+  exif = exif_data_new();
+  if (!exif) {
+		fprintf(stderr, "Out of memory\n");
+		return false;
+	}
+
+  // Create a EXIF_TAG_USER_COMMENT tag.
+	entry = create_tag(exif, EXIF_IFD_EXIF, EXIF_TAG_USER_COMMENT,
+			sizeof(ASCII_COMMENT) + FILE_COMMENT_LEN - 2);
+	// Write the special header needed for a comment tag
+	memcpy(entry->data, ASCII_COMMENT, sizeof(ASCII_COMMENT)-1);
+	// Write the actual comment text, without the trailing NUL character
+	memcpy(entry->data+8, str, FILE_COMMENT_LEN-1);
+	// Get a pointer to the EXIF data block we just created
+	exif_data_save_data(exif, &exif_data, &exif_data_len);
+	assert(exif_data != NULL);
+
+
+  newImgFile = fopen(server_filename, "wb+");
+	if (!newImgFile) {
+		fprintf(stderr, "Error creating file %s\n",  server_filename);
+		exif_data_unref(exif);
+		return false;
+	}
+	// Write EXIF header
+	if (fwrite(exif_header, exif_header_len, 1, newImgFile) != 1) {
+		fprintf(stderr, "Error writing to file %s\n",  server_filename);
+		return false;
+	}
+	// Write EXIF block length in big-endian order
+	if (fputc((exif_data_len+2) >> 8, newImgFile) < 0) {
+		fprintf(stderr, "Error writing to file %s\n",  server_filename);
+		return false;
+	}
+	if (fputc((exif_data_len+2) & 0xff, newImgFile) < 0) {
+		fprintf(stderr, "Error writing to file %s\n",  server_filename);
+		return false;
+	}
+	// Write EXIF data block
+	if (fwrite(exif_data, exif_data_len, 1, newImgFile) != 1) {
+		fprintf(stderr, "Error writing to file %s\n",  server_filename);
+		return false;
+	}
+	// Write JPEG image data, skipping the non-EXIF header
+	if (fwrite(imgFileBuf + image_data_offset, fileLen, 1, newImgFile) != 1) {
+		fprintf(stderr, "Error writing to file %s\n",  server_filename);
+		return false;
+	}
+	printf("Wrote file %s\n", server_filename);
+
+	if (fclose(newImgFile)) {
+		fprintf(stderr, "Error writing to file %s\n", server_filename);
+		return false;
+	}
+	// The allocator we're using for ExifData is the standard one, so use
+	// it directly to free this pointer.
+	free(exif_data);
+	exif_data_unref(exif);
+
+  return true;
+}
+
+/***********************************************************************/
+ExifEntry *Server::create_tag(ExifData *exif, ExifIfd ifd, ExifTag tag, size_t len)
+{
+//Helper function to allocate Image Exif data entry
+//
+	void *buf;
+	ExifEntry *entry;
+
+	/* Create a memory allocator to manage this ExifEntry */
+	ExifMem *mem = exif_mem_new_default();
+	assert(mem != NULL); /* catch an out of memory condition */
+
+	/* Create a new ExifEntry using our allocator */
+	entry = exif_entry_new_mem (mem);
+	assert(entry != NULL);
+
+	/* Allocate memory to use for holding the tag data */
+	buf = exif_mem_alloc(mem, len);
+	assert(buf != NULL);
+
+	/* Fill in the entry */
+	entry->data = (unsigned char *) buf;
+	entry->size = len;
+	entry->tag = tag;
+	entry->components = len;
+	entry->format = EXIF_FORMAT_UNDEFINED;
+
+	/* Attach the ExifEntry to an IFD */
+	exif_content_add_entry (exif->ifd[ifd], entry);
+
+	/* The ExifMem and ExifEntry are now owned elsewhere */
+	exif_mem_unref(mem);
+	exif_entry_unref(entry);
+
+	return entry;
+}
+
+/***********************************************************************/
 void Server::setIP(const char *ip_string){
 //Set Ip server to bind
 //
@@ -185,7 +316,7 @@ bool Server::isLocalRequest(unsigned long client_addr){
 }
 
 /***********************************************************************/
-uint32_t Server::getIPInRightEndianess(unsigned long client_addr){
+uint32_t Server::getIPInRightEndianess(unsigned long client_addr) const{
 //return IP in host byte order
 //
   uint32_t ip_addr = ZERO_4BYTES;
@@ -287,7 +418,7 @@ bool Server::isReqFromLocal(unsigned long client_addr, uint32_t * network,
 }
 
 /***********************************************************************/
-uint32_t Server::getServerNetwork(){
+uint32_t Server::getServerNetwork() const{
 ////Function to split Server IP in the Host byte order,...
 //... then return in 4bytes the Network address (without host)
 //... according to Network Class (A, B, C)
@@ -348,7 +479,7 @@ uint32_t Server::getServerNetwork(){
 }
 
 /***********************************************************************/
-bool Server::isBigEndian(void){
+bool Server::isBigEndian(void) const{
 //Return the current Arch endianess
 //
   int32_t n = 1;

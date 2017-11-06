@@ -18,14 +18,14 @@ Client::Client(const char *ip_server, unsigned short port_server){
 }
 
 /***********************************************************************/
-const char * Client::getIP(){
+const char * Client::getIP() const{
 //Get server ip to connect
 //
   return server_ip;
 }
 
 /***********************************************************************/
-unsigned short Client::getPort(){
+unsigned short Client::getPort() const{
 //Get server port to connect
 //
   return server_port;

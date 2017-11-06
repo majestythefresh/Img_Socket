@@ -17,6 +17,8 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <libgen.h>
+#include <assert.h>
+#include <libexif/exif-data.h>
 #include "img_types.h"
 
 using namespace std;
@@ -30,8 +32,8 @@ public:
   Server(const char *ip_server, unsigned short port_server,
         const char *path_server);
   ~Server();
-  const char * getIP();
-  const int getPort();
+  const char * getIP() const;
+  const int getPort() const;
   Errors openCon();
   Errors goListen();
   friend Errors printResponse( Errors er, Server *srv );
@@ -41,6 +43,7 @@ private:
   const char *server_ip;
   unsigned short server_port;
   const char *server_path;
+  const char *server_filename;
   static int socket_fd; //Static to close socket trough a signal handler
   int accept_fd;
   struct sockaddr_in server;
@@ -51,13 +54,15 @@ private:
   static bool end_flag; //Static to close socket listen loop
 
   bool rcvImage();
+  bool writeExifUserComment(const char * str);
+  ExifEntry *create_tag(ExifData *exif, ExifIfd ifd, ExifTag tag, size_t len);
   void setIP(const char *ip_string);
   bool isLocalRequest(unsigned long client_addr);
-  uint32_t getIPInRightEndianess(unsigned long client_addr);
+  uint32_t getIPInRightEndianess(unsigned long client_addr) const;
   bool isReqFromLocal(unsigned long client_addr, uint32_t * network,
                       uint32_t * host);
-  uint32_t getServerNetwork();
-  bool isBigEndian(void);
+  uint32_t getServerNetwork() const;
+  bool isBigEndian(void) const;
 
 };
 #endif

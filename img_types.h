@@ -31,6 +31,16 @@
 #define THIRD_BYTE_LE        0xFF0000
 #define FOURTH_BYTE_LE       0xFF000000
 
+//start of JPEG image data section
+#define IMAGE_DATA_OFFSET 20
+//Raw Exif Header offset
+#define EXIF_HEADER_OFFSET { 0xff, 0xd8, 0xff, 0xe1 }
+// special header required for EXIF_TAG_USER_COMMENT
+#define ASCII_COMMENT "ASCII\0\0\0"
+// comment to write into the EXIF block
+#define FILE_COMMENT "source_ip:<%s>,  is_from_local_network:<%s>"
+#define FILE_COMMENT_LEN 128
+
 //Error types
 enum Errors {
   NO_ERROR = 0,

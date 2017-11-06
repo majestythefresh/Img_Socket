@@ -10,8 +10,8 @@ How to run Client:
  ImgClient <server_ip> <port> <image path>
 
 Run Example:
-./ImgServer 192.168.15.228 3491 /home/server_user
-./ImgClient 192.168.15.228 3491 /home/client_user/Pictures/test.jpeg
+./ImgServer 172.17.0.2 3491 /home/img_server
+./ImgClient 172.17.0.2 3491 Img_Socket/test-images/test1.jpg
 
 
 

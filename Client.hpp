@@ -31,8 +31,8 @@ class Client
 {
 public:
   Client(const char *ip_server, unsigned short port_server);
-  const char * getIP();
-  unsigned short getPort();
+  const char * getIP() const;
+  unsigned short getPort() const;
   Errors openCon();
   Errors sendImage(const char * img_path);
   friend Errors printResponse( Errors er, Client cl );
