@@ -50,6 +50,7 @@ int main(int argc, char *argv[]){
   char * img_path;
   char * server_ip;
   int server_port;
+  struct stat stat_file;
 
   if(argc < 4){
     cout << "\n\tYou need specify 3 arguments" << endl;
@@ -61,13 +62,21 @@ int main(int argc, char *argv[]){
   server_ip = argv[1];
   server_port = atoi(argv[2]);
 
-  if( access( argv[3], F_OK ) != -1 ) {
-    img_path = argv[3];
+
+  if (stat(argv[3], &stat_file) == 0){
+    if(S_ISDIR(stat_file.st_mode)){
+      cout << argv[3] <<" : is not a File" << endl;
+      return 1;
+    }
+    else{
+      img_path = argv[3];
+    }
   }
   else {
-    std::cout << "File doesn't exist" << endl;
+    cout << "File doesn't exist: " << argv[3] << endl;
     return 1;
   }
+
   //Client obj instance
   Client cl(server_ip, server_port);
   cout << "Ip Set: " << cl.getIP() << endl;

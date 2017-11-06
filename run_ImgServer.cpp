@@ -40,7 +40,7 @@ Errors printResponse( Errors er, Server *srv ){
     break;
 
     case ACCEPT_ERROR:
-    std::cout << "Accept Connection error to " << srv->getIP() << endl;
+    cout << "Accept Connection error to " << srv->getIP() << endl;
     break;
 
     default:
@@ -61,6 +61,7 @@ int main(int argc, char *argv[]){
   char * server_ip;
   int server_port;
   char * server_path;
+  struct stat stat_file;
 
   if(argc < 4){
     cout << "\n\tYou need specify 3 arguments:" << endl;
@@ -72,7 +73,13 @@ int main(int argc, char *argv[]){
   }
   server_ip = argv[1];
   server_port = atoi(argv[2]);
-  server_path = argv[3];
+  if (stat(argv[3], &stat_file) == 0 && S_ISDIR(stat_file.st_mode)){
+    server_path = argv[3];
+  }
+  else {
+    cout << "Folder doesn't exist: " << argv[3] << endl;
+    return 1;
+  }
   //Server obj instance
   Server srv(server_ip, server_port, server_path);
   cout << "Ip Set: " << srv.getIP() << endl;

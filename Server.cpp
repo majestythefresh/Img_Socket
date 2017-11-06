@@ -80,8 +80,8 @@ Errors Server::goListen(){
       return ACCEPT_ERROR;
     }
     else{
-      std::cout << "* Connection attempt from " << inet_ntoa(client.sin_addr)
-                << endl;
+      cout << "* Connection attempt from " << inet_ntoa(client.sin_addr)
+           << endl;
       printf("[ Request Network Byte Order IP: %x ]\n", client.sin_addr.s_addr);
       //To proceed a transfer the client request need to come from local network
       if (isLocalRequest(client.sin_addr.s_addr)){
