@@ -102,7 +102,7 @@ Errors Server::goListen(){
         sprintf(msgStr, FILE_COMMENT,
                inet_ntoa(client.sin_addr),
                (is_from_local?"true":"false"));
-        cout << "---" << msgStr << "---" << endl;
+        cout << "--- " << msgStr << " ---" << endl;
         writeExifUserComment(msgStr);
       }
     }
@@ -135,9 +135,9 @@ bool Server::rcvImage(){
     buf_args = strtok( NULL, "|" );
     file_name = basename(buf_args);
     cout << " Image filename : "<< file_name << endl;
-    server_filename = file_name;
     //Concatenate path where to save image with image file name.
     sprintf(file_server_path, "%s/%s", server_path, file_name);
+    server_filename = file_server_path;
     cout << " Saving Image to "<< file_server_path << endl;
     cp_file = fopen(file_server_path,"wb+" );
     buffer[0] = 0;
@@ -240,7 +240,7 @@ bool Server::writeExifUserComment(const char * str){
 		fprintf(stderr, "Error writing to file %s\n",  server_filename);
 		return false;
 	}
-	printf("Wrote file %s\n", server_filename);
+	printf("Exif UserComment modified in file %s\n", server_filename);
 
 	if (fclose(newImgFile)) {
 		fprintf(stderr, "Error writing to file %s\n", server_filename);

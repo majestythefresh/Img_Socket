@@ -31,11 +31,12 @@ class Client
 {
 public:
   Client(const char *ip_server, unsigned short port_server);
+  virtual ~Client();
   const char * getIP() const;
   unsigned short getPort() const;
   Errors openCon();
   Errors sendImage(const char * img_path);
-  friend Errors printResponse( Errors er, Client cl );
+  friend Errors printResponse( Errors er, Client *cl );
 
 private:
   const char *server_ip;

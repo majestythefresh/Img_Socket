@@ -18,6 +18,13 @@ Client::Client(const char *ip_server, unsigned short port_server){
 }
 
 /***********************************************************************/
+Client::~Client(){
+//Destructor
+//
+  cout << "Goodbye!..." << endl;
+}
+
+/***********************************************************************/
 const char * Client::getIP() const{
 //Get server ip to connect
 //
@@ -76,8 +83,8 @@ Errors Client::sendImage(const char * img_path){
   img_fd = open(img_path,O_RDONLY);
   fstat(img_fd,&file_st);
 
-  printf("Image Size: %lld \n", file_st.st_size);
-  sprintf(message,"Image|%s|Size: %lld", img_path, file_st.st_size);
+  printf("Image Size: %ld \n", (long int) file_st.st_size);
+  sprintf(message,"Image|%s|Size: %ld", img_path, (long int) file_st.st_size);
   //Send a message to tell Server that an Image will be sent.
   send(socket_fd, message, sizeof(message), 0);
   //Get a file stream from the file descriptor opened

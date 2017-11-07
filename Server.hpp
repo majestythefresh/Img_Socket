@@ -32,7 +32,7 @@ class Server
 public:
   Server(const char *ip_server, unsigned short port_server,
         const char *path_server);
-  ~Server();
+  virtual ~Server();
   const char * getIP() const;
   const int getPort() const;
   Errors openCon();

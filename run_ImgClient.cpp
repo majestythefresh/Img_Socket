@@ -10,34 +10,34 @@
 #include "Client.hpp"
 
 /***********************************************************************/
-Errors printResponse( Errors er, Client cl ){
+Errors printResponse( Errors er, Client *cl ){
 //Helper friend function to handle error messages
 //
   switch(er){
     case NO_ERROR:
-    cout << "Connection Success to [" << cl.getIP()  << "] - Port [" <<
-            cl.getPort() << "]" << endl;
+    cout << "Connection Success to [" << cl->getIP()  << "] - Port [" <<
+            cl->getPort() << "]" << endl;
     break;
 
     case SOCK_ERROR:
-    cout << "Socket creation error to [" << cl.getIP()  << "] - Port [" <<
-            cl.getPort() << "]" << endl;
+    cout << "Socket creation error to [" << cl->getIP()  << "] - Port [" <<
+            cl->getPort() << "]" << endl;
     break;
 
     case CON_ERROR:
-    cout << "Connection error to [" << cl.getIP()  << "] - Port [" <<
-            cl.getPort() << "]" << endl;
+    cout << "Connection error to [" << cl->getIP()  << "] - Port [" <<
+            cl->getPort() << "]" << endl;
     cout << "The server maybe this off or IP is out of reach" << endl;
     break;
 
     case ACCESS_ERROR:
-    cout << "Connection access error to [" << cl.getIP()  << "] - Port [" <<
-            cl.getPort() << "]" << endl;
+    cout << "Connection access error to [" << cl->getIP()  << "] - Port [" <<
+            cl->getPort() << "]" << endl;
     break;
 
     default:
-    cout << "Unknow error to [" << cl.getIP()  << "] - Port [" <<
-            cl.getPort() << "]" << endl;
+    cout << "Unknow error to [" << cl->getIP()  << "] - Port [" <<
+            cl->getPort() << "]" << endl;
     break;
   }
   return er;
@@ -81,9 +81,9 @@ int main(int argc, char *argv[]){
   Client cl(server_ip, server_port);
   cout << "Ip Set: " << cl.getIP() << endl;
   //Open a connection to Server
-  if(printResponse(cl.openCon(), cl) == NO_ERROR){
+  if(printResponse(cl.openCon(), &cl) == NO_ERROR){
     //If no error Send an Image!
-    printResponse(cl.sendImage(img_path),cl);
+    printResponse(cl.sendImage(img_path),&cl);
   }
   return 0;
 }

@@ -48,7 +48,7 @@ enum Errors {
   CON_ERROR,
   ACCEPT_ERROR,
   ACCESS_ERROR,
-  SEND_ERROR,
+  SEND_ERROR
 };
 
 #endif
