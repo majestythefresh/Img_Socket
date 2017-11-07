@@ -9,8 +9,14 @@
 #ifndef IMG_TYPES_H
 #define IMG_TYPES_H
 
+#define BUF_4KB  4096
+#define BUF_1KB  1024
+#define BUF_256B 256
+
 #define ACK_MSG    "ACK"
 #define NO_ACK_MSG "No ACK"
+#define INCOMPLETE_MSG "Server Transfer [INCOMPLETE]"
+#define COMPLETE_MSG "Server Transfer [COMPLETE]"
 #define ACK_BUF    6
 
 #define CLASS_A_SUB_MASK_LE  0xFF000000

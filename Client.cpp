@@ -74,8 +74,7 @@ Errors Client::sendImage(const char * img_path){
 //
   struct stat file_st;
   int img_fd;
-  char message[1024];
-  char img_buf[65000];
+  char message[BUF_1KB];
   int next_char_st;
   char chunk[1];
   int count = 0;
@@ -84,7 +83,7 @@ Errors Client::sendImage(const char * img_path){
   fstat(img_fd,&file_st);
 
   printf("Image Size: %ld \n", (long int) file_st.st_size);
-  sprintf(message,"Image|%s|Size: %ld", img_path, (long int) file_st.st_size);
+  sprintf(message,"Image|%s|Size|%ld", img_path, (long int) file_st.st_size);
   //Send a message to tell Server that an Image will be sent.
   send(socket_fd, message, sizeof(message), 0);
   //Get a file stream from the file descriptor opened

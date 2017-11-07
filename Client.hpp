@@ -43,7 +43,7 @@ private:
   unsigned short server_port;
   int socket_fd;
   struct sockaddr_in server;
-  char ack_buffer[6];
+  char ack_buffer[ACK_BUF];
 
   void setIP(const char *ip_string);
 

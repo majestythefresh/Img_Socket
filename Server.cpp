@@ -115,31 +115,36 @@ Errors Server::goListen(){
 bool Server::rcvImage(){
 //Receive an Image transfer and write to a file in Server path
 //
-  char buffer[4096];
+  char buffer[BUF_4KB];
   char * buf_args;
-  char file_server_path[256];
+  char file_server_path[BUF_256B];
   bool flag_rcv = false;
   char * file_name;
+  char * file_size;
   FILE* cp_file;
   int count = 0;
 
   //Start to read header request of Image type
   recv(accept_fd, buffer, sizeof(buffer), 0);
-  cout << "Receiving File transfer request: " << endl;
-  cout << "[" << buffer << "]" << endl;
+  cout << " Receiving File transfer request: " << endl;
+  cout << "   [" << buffer << "]" << endl;
   //If the header is Image type start to write stream to a file.
   if(! strncmp(buffer,"Image",5) ){
-    cout << "--- File request type: Image [ OK ] ---" << endl;
+    cout << "\t-- File request type: Image [ OK ]" << endl;
     //Splitting header to ger file name
     buf_args = strtok( buffer, "|" );
     buf_args = strtok( NULL, "|" );
     file_name = basename(buf_args);
-    cout << " Image filename : "<< file_name << endl;
+    buf_args = strtok( NULL, "|" );
+    buf_args = strtok( NULL, "|" );
+    file_size = buf_args;
+    cout << "\t    Message Header Image size : "<< file_size << endl;
+    cout << "\t    Message Header Image filename : "<< file_name << endl;
     //Concatenate path where to save image with image file name.
     sprintf(file_server_path, "%s/%s", server_path, file_name);
     server_filename = file_server_path;
-    cout << " Saving Image to "<< file_server_path << endl;
-    cp_file = fopen(file_server_path,"wb+" );
+    cout << "\t-- Saving Image to "<< file_server_path << endl;
+    cp_file = fopen(file_server_path,"wb" );
     buffer[0] = 0;
     //Start saving to a file the data stream.
     while(!flag_rcv){
@@ -149,16 +154,22 @@ bool Server::rcvImage(){
         count++;
       }
       else{
-        cout << "--- Image Received : "<< count << " Bytes ---" << endl;
         flag_rcv = true;
         //flushing the descriptor stream to get image without corruption
         fflush(cp_file);
       }
     }
+    if(atoi(file_size) != count){
+      cout << "\t-- Image Received : "<< count << " Bytes [INCOMPLETE]" << endl;
+      //Removing incomplete file
+      remove(file_server_path);
+      return false;
+    }
+    cout << "\t-- Image Received : "<< count << " Bytes [COMPLETE]" << endl;
     fclose(cp_file);
   }
   else{
-    cout << "--- Wrong File request type: No Image [ X ] ---" << endl;
+    cout << "\t-- Wrong File request type: No Image [ X ]" << endl;
     return false;
   }
   return true;
@@ -191,7 +202,6 @@ bool Server::writeExifUserComment(const char * str){
   //Set char raw data in buffer
   fread(imgFileBuf, fileLen, 1, imgFile);
   fclose(imgFile);
-
   exif = exif_data_new();
   if (!exif) {
 		fprintf(stderr, "Out of memory\n");
@@ -208,7 +218,6 @@ bool Server::writeExifUserComment(const char * str){
 	// Get a pointer to the EXIF data block we just created
 	exif_data_save_data(exif, &exif_data, &exif_data_len);
 	assert(exif_data != NULL);
-
 
   newImgFile = fopen(server_filename, "wb+");
 	if (!newImgFile) {
