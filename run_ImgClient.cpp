@@ -51,17 +51,17 @@ int main(int argc, char *argv[]){
   char * server_ip;
   int server_port;
   struct stat stat_file;
+  bool ext_flag = false;
 
   if(argc < 4){
-    cout << "\n\tYou need specify 3 arguments" << endl;
-    cout << "\tImgClient <server_ip> <port> <image path>" << endl;
+    cout << "\n\tYou need specify 3 arguments at least" << endl;
+    cout << "\tImgClient <server_ip> <port> <image path> [-t]" << endl;
     cout << "\n\tExample:" << endl;
     cout << "\tImgClient 192.168.15.228 3491 /Users/plauchu/Pictures/test3.jpeg\n" << endl;
     return 1;
   }
   server_ip = argv[1];
   server_port = atoi(argv[2]);
-
 
   if (stat(argv[3], &stat_file) == 0){
     if(S_ISDIR(stat_file.st_mode)){
@@ -76,9 +76,16 @@ int main(int argc, char *argv[]){
     cout << "File doesn't exist: " << argv[3] << endl;
     return 1;
   }
+  //Set flag to accept outside from network transfers
+  if( argv[4] != NULL){
+    if(!strcmp(argv[4], "-t")){
+      ext_flag = true;
+    }
+  }
 
   //Client obj instance
   Client cl(server_ip, server_port);
+  cl.setTranferFlag(ext_flag);
   cout << "Ip Set: " << cl.getIP() << endl;
   //Open a connection to Server
   if(printResponse(cl.openCon(), &cl) == NO_ERROR){

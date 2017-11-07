@@ -62,8 +62,11 @@ Errors Client::openCon(){
   if ( ! strcmp(ack_buffer, ACK_MSG) ){
     cout << "--- Recive ACK ---" << endl;
   }
-  else {// If NO ACK, the transfer can't be
-    return ACCESS_ERROR;
+  else {
+    if(!external_transfer){
+      // If NO ACK, the transfer can't be
+      return ACCESS_ERROR;
+    }
   }
   return NO_ERROR;
 }
@@ -108,6 +111,13 @@ Errors Client::sendImage(const char * img_path){
   close(socket_fd);
 
   return NO_ERROR;
+}
+
+/***********************************************************************/
+void Client::setTranferFlag(bool flag){
+  // Set Transfer from outside flag.
+  //
+  external_transfer = flag;
 }
 
 /***********************************************************************/

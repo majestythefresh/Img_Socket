@@ -36,6 +36,7 @@ public:
   unsigned short getPort() const;
   Errors openCon();
   Errors sendImage(const char * img_path);
+  void setTranferFlag(bool flag);
   friend Errors printResponse( Errors er, Client *cl );
 
 private:
@@ -44,6 +45,7 @@ private:
   int socket_fd;
   struct sockaddr_in server;
   char ack_buffer[ACK_BUF];
+  bool external_transfer;
 
   void setIP(const char *ip_string);
 
