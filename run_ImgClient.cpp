@@ -52,12 +52,18 @@ int main(int argc, char *argv[]){
   int server_port;
   struct stat stat_file;
   bool ext_flag = false;
+  char * ext_file;
 
   if(argc < 4){
     cout << "\n\tYou need specify 3 arguments at least" << endl;
     cout << "\tImgClient <server_ip> <port> <image path> [-t]" << endl;
+    cout << "\t   server_ip : server ip to connect." << endl;
+    cout << "\t   port      : Server port to connect." << endl;
+    cout << "\t   image path: path to Image to transfer." << endl;
+    cout << "\t   -t        : Send Image even NO ACK (Request from not a local network) received." << endl;
     cout << "\n\tExample:" << endl;
-    cout << "\tImgClient 192.168.15.228 3491 /Users/plauchu/Pictures/test3.jpeg\n" << endl;
+    cout << "\tImgClient 192.168.15.228 3491 /Users/plauchu/Pictures/test3.jpeg" << endl;
+    cout << "\tImgClient 192.168.15.228 3491 /Users/plauchu/Pictures/test3.jpeg -t\n" << endl;
     return 1;
   }
   server_ip = argv[1];
@@ -69,6 +75,17 @@ int main(int argc, char *argv[]){
       return 1;
     }
     else{
+      ext_file = strrchr(argv[3], '.');
+      if (!ext_file) {
+        cout << "No extension in file, it needs to being .jpg or .jpeg: " << argv[3] << endl;
+        return 1;
+      }
+      else {
+        if(strcasecmp(ext_file,".jpg") && strcasecmp(ext_file,".jpeg")){
+          cout << "File needs to being .jpg or .jpeg: " << ext_file << endl;
+          return 1;
+        }
+      }
       img_path = argv[3];
     }
   }

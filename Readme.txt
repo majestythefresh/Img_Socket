@@ -3,15 +3,22 @@ $ g++ Server.cpp run_ImgServer.cpp -o ImgServer -lexif
 $ g++ Client.cpp run_ImgClient.cpp -o ImgClient
 
 * How to run Server:
- ImgServer <server_ip> <port> <path to save transferred images>
+ ImgServer <server_ip> <port> <images path>
+   server_ip   : ip to start listening.
+   port        : port to start listening.
+   images path : Server folder to save tranferred images.
  To stop server: hit Ctrl+c
 
 * How to run Client:
- ImgClient <server_ip> <port> <image path>
+ ImgClient <server_ip> <port> <image path> [-t]
+   server_ip : server ip to connect.
+   port      : Server port to connect.
+   image path: path to Image to transfer.
+   -t        : Send Image even NO ACK (Request from not a local network) received.
 
 * Run Example:
 $ ./ImgServer 172.17.0.2 3491 /home/img_server
-$ ./ImgClient 172.17.0.2 3491 Img_Socket/test-images/test1.jpg
+$ ./ImgClient 172.17.0.2 3491 Img_Socket/test-images/test1.jpg -t
 
 
 

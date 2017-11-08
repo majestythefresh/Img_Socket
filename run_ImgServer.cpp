@@ -65,8 +65,10 @@ int main(int argc, char *argv[]){
 
   if(argc < 4){
     cout << "\n\tYou need specify 3 arguments:" << endl;
-    cout << "\tImgServer <server_ip> <port> <path to save transferred images>"
-         << endl;
+    cout << "\tImgServer <server_ip> <port> <images path>" << endl;
+    cout << "\t   server_ip   : ip to start listening.>" << endl;
+    cout << "\t   port        : port to start listening." << endl;
+    cout << "\t   images path : Server folder to save tranferred images." << endl;
     cout << "\n\tExample:" << endl;
     cout << "\tImgServer 192.168.15.228 3491 /Users/plauchu\n" << endl;
     return 1;
